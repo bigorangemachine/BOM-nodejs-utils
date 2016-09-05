@@ -21,7 +21,7 @@ vars.console_chrs={
     'red':'\033[31m',
     //'unred':'\033[91m',
     'unred':'\033[00m', // now clearall
-    'yellow':'\033[91m',
+    'yellow':'\033[33m',
     'bold': '\033[1m',// \e[4m
     'unbold': '\033[0m'
 };
