@@ -19,8 +19,11 @@ vars.capture_types={//files that can be captured as a text file - headers to fil
 vars.console_chrs={
     'clearall':'\033[00m',
     'red':'\033[31m',
+        'unred':'\033[00m', // now clearall /* this should be removed but is depricated now - check other projects clean this one up*/
     //'unred':'\033[91m',
-    'unred':'\033[00m', // now clearall
+    'green':'\033[32m',
+    'magenta':'\033[35m',
+    'cyan':'\033[36m',
     'yellow':'\033[33m',
     'bold': '\033[1m',// \e[4m
     'unbold': '\033[0m'
