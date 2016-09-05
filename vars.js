@@ -17,7 +17,12 @@ vars.capture_types={//files that can be captured as a text file - headers to fil
     'json':vars.content_types.js_app
 };
 vars.console_chrs={
-    'bold': '\033[1m',
+    'clearall':'\033[00m',
+    'red':'\033[31m',
+    'unred':'\033[91m',
+    'yellow':'\033[33m',
+    'unyellow':'\033[93m',
+    'bold': '\033[1m',// \e[4m
     'unbold': '\033[0m'
 };
 vars.emonji={
