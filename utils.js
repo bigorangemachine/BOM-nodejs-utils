@@ -2,6 +2,10 @@
 module.exports.getRandomInt=function(min, max){
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+module.exports.regexp_escape=function(strIn){
+    return strIn.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
+}
 module.exports.isNode=function(){
     if(typeof(process)!=='undefined' && typeof(process.versions)!=='undefined' && typeof(process.versions)!=='undefined' && typeof(process.versions.node)!=='undefined'){
         return true;
