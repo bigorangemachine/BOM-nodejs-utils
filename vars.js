@@ -19,9 +19,15 @@ vars.capture_types={//files that can be captured as a text file - headers to fil
 vars.console_chrs={
     'bold': '\033[1m',
     'unbold': '\033[0m'
-
+};
+vars.emonji={
+    "beer":"\uD83C\uDF7A",
+    "beers":"\uD83C\uDF7B",
+    'siren': "\uD83D\uDEA8",
+    'key': "\uD83D\uDD11",
+    "skull":"\u2620"
 };
 vars.const_str={
-    'omitted': '******OMITTED******'
+    'omitted': "**"+vars.emonji.key+"** OMITTED **"+vars.emonji.key+"**"
 };
 module.exports = vars;
