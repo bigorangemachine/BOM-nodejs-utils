@@ -21,11 +21,12 @@ vars.console_chrs={
     'unbold': '\033[0m'
 };
 vars.emonji={
-    "beer":"\uD83C\uDF7A",
-    "beers":"\uD83C\uDF7B",
+    'beer':"\uD83C\uDF7A",
+    'beers':"\uD83C\uDF7B",
+    'caution':"\u26A0",
     'siren': "\uD83D\uDEA8",
     'key': "\uD83D\uDD11",
-    "skull":"\u2620"
+    'skull':"\u2620"
 };
 vars.const_str={
     'omitted': "**"+vars.emonji.key+"** OMITTED **"+vars.emonji.key+"**"
