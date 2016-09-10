@@ -2,7 +2,14 @@
 module.exports.getRandomInt=function(min, max){
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-
+module.exports.convert_args=function(argsIn){
+    if(typeof(argsIn)==='object' && argsIn.length>0){
+        var out_args=[];
+        for(var arg_inc=0;arg_inc<argsIn.length;arg_inc++){out_args.push(argsIn[argsIn]);}
+        return out_args;
+    }
+    return [];
+}
 module.exports.regexp_escape=function(strIn){
     return strIn.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
 }
