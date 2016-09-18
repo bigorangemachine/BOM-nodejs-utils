@@ -20,5 +20,5 @@
     "url": "https://github.com/bigorangemachine/BOM-nodejs-utils.git"
   },
   "main": "utils.js",
-  "version": "0.0.2"
+  "version": "0.0.3"
 }

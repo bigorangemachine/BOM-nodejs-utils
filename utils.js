@@ -5,7 +5,7 @@ module.exports.getRandomInt=function(min, max){
 module.exports.convert_args=function(argsIn){
     if(typeof(argsIn)==='object' && argsIn.length>0){
         var out_args=[];
-        for(var arg_inc=0;arg_inc<argsIn.length;arg_inc++){out_args.push(argsIn[argsIn]);}
+        for(var arg_inc=0;arg_inc<argsIn.length;arg_inc++){out_args.push(argsIn[arg_inc]);}
         return out_args;
     }
     return [];
