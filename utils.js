@@ -10,7 +10,7 @@ module.exports.convert_args=function(argsIn){
     }
     return [];
 }
-module.exports.regexp_escape=function(strIn){
+module.exports.regexp_escape=function(strIn){// http://stackoverflow.com/questions/494035/how-do-you-pass-a-variable-to-a-regular-expression-javascript/494122#494122
     return strIn.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
 }
 module.exports.isNode=function(){
@@ -281,7 +281,9 @@ module.exports.clone=function(obj){
     if (null===obj || typeof(obj)!=='object'){return obj;}// Handle the 3 simple types, and null or undefined
     else if(obj instanceof Array){return obj.concat([]);}// Handle Array
     else if(typeof(obj)==='object'){// Handle Object
-        if(obj instanceof Object){
+        if(obj instanceof Date){
+            return new Date(obj.toISOString());
+        }else if(obj instanceof Object){
             copy={};
             for(var attr in obj){try{copy[attr]=self.clone(obj[attr]);}catch(errToken){}}
             return copy;
@@ -297,4 +299,76 @@ module.exports.clone=function(obj){
     }
     throw new Error("Unable to copy obj! Its type isn't supported.");
     return obj;
-}
+};
+/*
+
+            formattingData = {'currency':null};
+            if(typeof(opts.currency)==='object'){//{'symbol':'$','int_sep':',', 'dec_sep':'.' , 'ind_location':'prefix' or 'suffix' }
+                formattingData.currency = opts.currency;
+                //force format(s)
+                formattingData.currency.ind_location = formattingData.currency.ind_location.toLowerCase();
+            }
+
+            formatCurrency: function (numIn, opts) {//not sure what to do with opts(yet!)
+                    var utils=this,
+                        regexp_escape=function(strIn){//http://stackoverflow.com/questions/494035/how-do-you-pass-a-variable-to-a-regular-expression-javascript/494122#494122
+                            return strIn.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
+                        },
+                        clean_num=function(num){//clean up the number so parseFloat can convert correctly despite localization
+                            var num_str=num.toString().replace(new RegExp(utils.regexp_escape(formattingData.currency.int_sep),'gi'),'').replace(new RegExp(utils.regexp_escape(formattingData.currency.dec_sep),'gi'),'.'),
+                                dec_count=(num_str.match(new RegExp('.','gi')) || []).length;
+                            if(dec_count>1){
+                                var dec_ex=num_str.split('.'),
+                                    new_num_str='';
+                                for(var i=dec_ex.length-1;i>=0;i--){
+                                    new_num_str=(i===1?'.':'') + dec_ex[i] + new_num_str;
+                                }
+                                num_str=new_num_str;
+                            }
+                            return num_str;
+                        },
+                        objectize_num=function(num){//sorry this evolved to this rather than reuse what was available
+                            if(typeof(num)!=='number'){throw new Error("td-core objectize_num() was not passed type 'number'; was passed '"+num+"'.");}
+                            var num_str=num.toString(),
+                                output={'dec':"00",'int':"0",'dec_sep':formattingData.currency.dec_sep,'int_sep':formattingData.currency.int_sep,'num':0};
+                            if(num_str.indexOf('.')!==-1){//real/decimal number?
+                                var dec_ex=num_str.split('.');
+                                output.int=dec_ex.slice(0, dec_ex.length-1).join('');
+                                output.dec=dec_ex.slice(-1).join('');//join but remove the int part
+                            }else{//int number
+                                output.int=num.toString();
+                                output.dec="00";
+                            }
+                            if(output.dec.length<2){//padd out if its 0.5 (50 cents)
+                                for(var d=output.dec.length;d<2;d++){
+                                    output.dec=output.dec + "0";
+                                }
+                            }
+                            output.num=parseFloat(output.int+'.'+output.dec);
+                            if(output.int.length>3){
+                                var new_int='',
+                                    inc=0;
+                                for(var i=output.int.length-1;i>=0;i--){
+                                    new_int=output.int[i] + (inc%3!==0 || inc===0?'':output.int_sep) + new_int;
+                                    inc++;
+                                }
+                                output.int=new_int;
+                            }
+
+                            var prefix=(formattingData.currency.ind_location==='prefix'?formattingData.currency.symbol:''),
+                                suffix=(formattingData.currency.ind_location==='suffix'?' '+formattingData.currency.symbol:'');
+
+                            output.toString=function(){return (prefix) + output.int + output.dec_sep + output.dec + (suffix);};
+                            return output;
+                        };
+//var currency_obj=$rootScope.currencyNumberHelper({'sep':{'int':formattingData.currency.int_sep, 'dec':formattingData.currency.dec_sep}, 'unit':formattingData.currency.symbol});
+//formattingData.currency.int_sep=' ';formattingData.currency.dec_sep=',';
+//console.log("=================== UNIT TEST int: "+formattingData.currency.int_sep+"  dec: "+formattingData.currency.dec_sep+" =======================");
+//['1 525 123 456,98,765,432','9456,92', '2 456,9', '320', ',51113333', ',2768,882', '1,525,123,456.98.765.432', '9456.92', '2,456.9', '320', '.51113333', '.2768.882'].forEach(function(v){console.log(v+': ',clean_num(v));});
+//['1,525,123,456.98.765.432','9456.92','2,456.9','320','.51113333','.2768.882','1.525.123.456.98.765.432','9456.92','2.456.9','320','.51113333','.2768.882'].forEach(function(v){console.log(v+': '.clean_num(v));});
+
+                        return objectize_num(parseFloat(clean_num((typeof(numIn)!=='undefined' && !isNaN(numIn) && numIn!==null?numIn.toString():'0')))).toString();
+
+            }
+        };
+*/
