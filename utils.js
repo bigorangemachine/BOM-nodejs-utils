@@ -270,7 +270,7 @@ module.exports.get_auth_creds=function(urlStr, pkgObjs){
     return (this.obj_valid_key(pkgObjs.config.auth_creds, p_url.host)?pkgObjs.config.auth_creds[ p_url.host ]:false);
 };
 module.exports.parse_subtext=function(str,objs,nullRep){
-    return str.replace(/\{(.+?)\}/g, function(m, key, url) {
+    return str.replace(/\{([^"'].+?)\}/g, function(m, key, url) {
         var rep_fail=(typeof(nullRep)==='undefined'?objs[key]:nullRep);
         if(typeof(rep_fail)==='undefined'){rep_fail='{'+key+'}';}
         return (typeof(objs[key])!=='undefined'?objs[key]:rep_fail);
@@ -301,74 +301,67 @@ module.exports.clone=function(obj){
     return obj;
 };
 /*
-
-            formattingData = {'currency':null};
-            if(typeof(opts.currency)==='object'){//{'symbol':'$','int_sep':',', 'dec_sep':'.' , 'ind_location':'prefix' or 'suffix' }
-                formattingData.currency = opts.currency;
-                //force format(s)
-                formattingData.currency.ind_location = formattingData.currency.ind_location.toLowerCase();
+default_currency={'symbol':'$','int_sep':',', 'dec_sep':'.' , 'ind_location':'prefix' },
+        objectize_num=function(num,opts){//sorry this evolved to this rather than reuse what was available
+            opts = merge(true,{},default_currency,(typeof(opts)==='object'?opts:{}));
+            if(typeof(num)!=='number'){throw new Error("td-core objectize_num() was not passed type 'number'; was passed '"+num+"'.");}
+            var num_str=num.toString(),
+                output={'dec':"00",'int':"0",'dec_sep':opts.dec_sep,'int_sep':opts.int_sep,'num':0};
+            if(num_str.indexOf('.')!==-1){//real/decimal number?
+                var dec_ex=num_str.split('.');
+                output.int=dec_ex.slice(0, dec_ex.length-1).join('');
+                output.dec=dec_ex.slice(-1).join('');//join but remove the int part
+            }else{//int number
+                output.int=num.toString();
+                output.dec="00";
+            }
+            if(output.dec.length<2){//padd out if its 0.5 (50 cents)
+                for(var d=output.dec.length;d<2;d++){
+                    output.dec=output.dec + "0";
+                }
+            }
+            output.num=parseFloat(output.int+'.'+output.dec);
+            if(output.int.length>3){
+                var new_int='',
+                    inc=0;
+                for(var i=output.int.length-1;i>=0;i--){
+                    new_int=output.int[i] + (inc%3!==0 || inc===0?'':output.int_sep) + new_int;
+                    inc++;
+                }
+                output.int=new_int;
             }
 
-            formatCurrency: function (numIn, opts) {//not sure what to do with opts(yet!)
-                    var utils=this,
-                        regexp_escape=function(strIn){//http://stackoverflow.com/questions/494035/how-do-you-pass-a-variable-to-a-regular-expression-javascript/494122#494122
-                            return strIn.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
-                        },
-                        clean_num=function(num){//clean up the number so parseFloat can convert correctly despite localization
-                            var num_str=num.toString().replace(new RegExp(utils.regexp_escape(formattingData.currency.int_sep),'gi'),'').replace(new RegExp(utils.regexp_escape(formattingData.currency.dec_sep),'gi'),'.'),
-                                dec_count=(num_str.match(new RegExp('.','gi')) || []).length;
-                            if(dec_count>1){
-                                var dec_ex=num_str.split('.'),
-                                    new_num_str='';
-                                for(var i=dec_ex.length-1;i>=0;i--){
-                                    new_num_str=(i===1?'.':'') + dec_ex[i] + new_num_str;
-                                }
-                                num_str=new_num_str;
-                            }
-                            return num_str;
-                        },
-                        objectize_num=function(num){//sorry this evolved to this rather than reuse what was available
-                            if(typeof(num)!=='number'){throw new Error("td-core objectize_num() was not passed type 'number'; was passed '"+num+"'.");}
-                            var num_str=num.toString(),
-                                output={'dec':"00",'int':"0",'dec_sep':formattingData.currency.dec_sep,'int_sep':formattingData.currency.int_sep,'num':0};
-                            if(num_str.indexOf('.')!==-1){//real/decimal number?
-                                var dec_ex=num_str.split('.');
-                                output.int=dec_ex.slice(0, dec_ex.length-1).join('');
-                                output.dec=dec_ex.slice(-1).join('');//join but remove the int part
-                            }else{//int number
-                                output.int=num.toString();
-                                output.dec="00";
-                            }
-                            if(output.dec.length<2){//padd out if its 0.5 (50 cents)
-                                for(var d=output.dec.length;d<2;d++){
-                                    output.dec=output.dec + "0";
-                                }
-                            }
-                            output.num=parseFloat(output.int+'.'+output.dec);
-                            if(output.int.length>3){
-                                var new_int='',
-                                    inc=0;
-                                for(var i=output.int.length-1;i>=0;i--){
-                                    new_int=output.int[i] + (inc%3!==0 || inc===0?'':output.int_sep) + new_int;
-                                    inc++;
-                                }
-                                output.int=new_int;
-                            }
+            var prefix=(opts.ind_location==='prefix'?opts.symbol:''),
+                suffix=(opts.ind_location==='suffix'?' '+opts.symbol:'');
 
-                            var prefix=(formattingData.currency.ind_location==='prefix'?formattingData.currency.symbol:''),
-                                suffix=(formattingData.currency.ind_location==='suffix'?' '+formattingData.currency.symbol:'');
+            output.toString=function(){return (prefix) + output.int + output.dec_sep + output.dec + (suffix);};
+            return output;
+        },
+        clean_num=function(num, opts){//clean up the number so parseFloat can convert correctly despite localization
+            opts = merge(true,{},default_currency,(typeof(opts)==='object'?opts:{}));
+            var num_str=num.toString().replace(new RegExp(utils.regexp_escape(opts.int_sep),'gi'),'').replace(new RegExp(utils.regexp_escape(opts.dec_sep),'gi'),'.'),
+                dec_count=(num_str.match(new RegExp('.','gi')) || []).length;
+            if(dec_count>1){
+                var dec_ex=num_str.split('.'),
+                    new_num_str='';
+                for(var i=dec_ex.length-1;i>=0;i--){
+                    new_num_str=(i===1?'.':'') + dec_ex[i] + new_num_str;
+                }
+                num_str=new_num_str;
+            }
+            return num_str;
+        },
+        formatCurrency=function(numIn, opts) {
+            opts = merge(true,{},default_currency,(typeof(opts)==='object'?opts:{}));
+            opts.ind_location = opts.ind_location.toLowerCase();
+            opts.ind_location = (opts.ind_location!=='prefix' || opts.ind_location!=='suffix'?'prefix':opts.ind_location);
 
-                            output.toString=function(){return (prefix) + output.int + output.dec_sep + output.dec + (suffix);};
-                            return output;
-                        };
-//var currency_obj=$rootScope.currencyNumberHelper({'sep':{'int':formattingData.currency.int_sep, 'dec':formattingData.currency.dec_sep}, 'unit':formattingData.currency.symbol});
-//formattingData.currency.int_sep=' ';formattingData.currency.dec_sep=',';
-//console.log("=================== UNIT TEST int: "+formattingData.currency.int_sep+"  dec: "+formattingData.currency.dec_sep+" =======================");
+            return objectize_num(parseFloat(clean_num((typeof(numIn)!=='undefined' && !isNaN(numIn) && numIn!==null?numIn.toString():'0')), opts), opts).toString();
+        };
+//var currency_obj=$rootScopeNumberHelper({'sep':{'int':opts.int_sep, 'dec':opts.dec_sep}, 'unit':opts.symbol});
+//opts.int_sep=' ';opts.dec_sep=',';
+//console.log("=================== UNIT TEST int: "+opts.int_sep+"  dec: "+opts.dec_sep+" =======================");
 //['1 525 123 456,98,765,432','9456,92', '2 456,9', '320', ',51113333', ',2768,882', '1,525,123,456.98.765.432', '9456.92', '2,456.9', '320', '.51113333', '.2768.882'].forEach(function(v){console.log(v+': ',clean_num(v));});
 //['1,525,123,456.98.765.432','9456.92','2,456.9','320','.51113333','.2768.882','1.525.123.456.98.765.432','9456.92','2.456.9','320','.51113333','.2768.882'].forEach(function(v){console.log(v+': '.clean_num(v));});
 
-                        return objectize_num(parseFloat(clean_num((typeof(numIn)!=='undefined' && !isNaN(numIn) && numIn!==null?numIn.toString():'0')))).toString();
-
-            }
-        };
 */
