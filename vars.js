@@ -4,8 +4,7 @@ var vars={
         'json':'text/json',
         'html':'text/html',
         'js':'text/javascript',
-        'js_app':'application/javascript',
-        'json':'application/x-javascript'
+        'js_app':'application/x-javascript'
     }
 };
 vars.capture_types={//files that can be captured as a text file - headers to file extension
@@ -13,8 +12,7 @@ vars.capture_types={//files that can be captured as a text file - headers to fil
     'json':vars.content_types.json,
     'html':vars.content_types.html,
     'js':vars.content_types.js,
-    'js_app':vars.content_types.js_app,
-    'json':vars.content_types.js_app
+    'js_app':vars.content_types.js_app
 };
 vars.console_chrs={
     'clearall':'\033[00m',
